@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fettle — A quiet habit tracker</title>
+  <meta name="description" content="Fettle is a calm habit tracker built with vanilla JavaScript — daily check-ins, streaks, a 12-week consistency heatmap and insights. No frameworks, no accounts, all data stays in your browser." />
+  <meta property="og:title" content="Fettle — A quiet habit tracker" />
+  <meta property="og:description" content="Track small habits, keep your streaks, and see the shape of your consistency. A vanilla-JS demo." />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#f7f5ef" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%B1%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="./" aria-label="Fettle home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c8.5 1 14.5-4 14-13-9-1-15 4-14 13Z"/><path d="M5 19c1.2-5 4.2-8.2 9-10"/></svg>
+        </span>
+        <span class="brand-word">Fettle</span>
+      </a>
+
+      <nav class="tabs" aria-label="Views">
+        <button type="button" class="tab active" data-view="today">Today</button>
+        <button type="button" class="tab" data-view="insights">Insights</button>
+      </nav>
+
+      <button id="add-habit" class="primary-btn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        <span>New habit</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow" id="today-label">Today</p>
+        <h1>Small steps, <em>kept.</em></h1>
+        <p class="hero-sub">A quiet habit tracker for the things that matter. Show up, tick the box, and let the streaks take care of themselves.</p>
+      </div>
+
+      <div class="today-card" aria-label="Today's progress">
+        <div class="ring" id="ring">
+          <svg viewBox="0 0 120 120" aria-hidden="true">
+            <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+            <circle class="ring-fg" id="ring-fg" cx="60" cy="60" r="52"></circle>
+          </svg>
+          <div class="ring-text">
+            <b id="ring-done">0</b>
+            <span id="ring-total">of 0</span>
+          </div>
+        </div>
+        <div class="today-meta">
+          <p class="today-title" id="today-title">Nothing scheduled</p>
+          <p class="today-sub" id="today-sub">Add your first habit to begin.</p>
+          <p class="today-streak" id="today-streak">🌱 Day one starts today</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-today" class="view" aria-labelledby="habits-heading">
+      <div class="view-head">
+        <h2 id="habits-heading">Your habits</h2>
+        <p class="view-sub" id="habit-count">0 habits</p>
+      </div>
+
+      <div id="habit-list" class="habit-list"></div>
+
+      <div id="today-empty" class="empty" hidden>
+        <p class="empty-ico" aria-hidden="true">🌱</p>
+        <h3>Start with one small thing</h3>
+        <p>Habits you can keep beat habits you can brag about. Pick something tiny — a glass of water, one page, a short walk.</p>
+        <button id="empty-add" class="primary-btn" type="button">Create a habit</button>
+      </div>
+
+      <p class="tip-line">Tip: tap any dot in a habit's last seven days to log or unlog that day.</p>
+    </section>
+
+    <section id="view-insights" class="view" aria-labelledby="insights-heading" hidden>
+      <div class="view-head">
+        <h2 id="insights-heading">Insights</h2>
+        <p class="view-sub">The shape of your last 30 days.</p>
+      </div>
+
+      <div id="insight-stats" class="stat-grid"></div>
+
+      <div class="panel heat-card">
+        <div class="panel-head">
+          <div>
+            <h3>Consistency</h3>
+            <p>Last 12 weeks · darker means more habits done</p>
+          </div>
+          <div class="legend" aria-hidden="true">
+            <span>Less</span>
+            <i class="lv0"></i><i class="lv1"></i><i class="lv2"></i><i class="lv3"></i><i class="lv4"></i>
+            <span>More</span>
+          </div>
+        </div>
+        <div class="heat-body">
+          <div class="heat-wrap">
+            <div class="heat-days" aria-hidden="true"><span>Mon</span><span>Wed</span><span>Fri</span></div>
+            <div id="heatmap" class="heatmap" role="img" aria-label="Habit completion heatmap for the last 12 weeks"></div>
+          </div>
+          <div id="heat-side" class="heat-side"></div>
+        </div>
+        <div id="heat-tip" class="heat-tip" hidden></div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h3>Weekly rhythm</h3>
+              <p>Completion by week</p>
+            </div>
+          </div>
+          <div id="week-chart" class="bar-chart"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h3>By habit</h3>
+              <p>Last 30 days</p>
+            </div>
+          </div>
+          <div id="habit-breakdown" class="breakdown"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>Fettle — a vanilla-JS habit tracker by
+      <a href="https://github.com/MuhammadAwais047" target="_blank" rel="noopener noreferrer">Muhammad Awais</a> ·
+      <a href="https://github.com/MuhammadAwais047/tracker-app" target="_blank" rel="noopener noreferrer">Source</a></p>
+    <p class="foot-note">Your data lives only in this browser.</p>
+  </footer>
+
+  <!-- ============ HABIT MODAL ============ -->
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <form id="habit-form" class="sheet" novalidate>
+      <div class="sheet-head">
+        <h2 id="modal-title">New habit</h2>
+        <button type="button" class="icon-btn" data-close aria-label="Close dialog">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+
+      <label class="field">
+        <span class="field-label">Name</span>
+        <input id="habit-name" name="name" type="text" maxlength="40" placeholder="e.g. Read 20 pages" autocomplete="off" required />
+      </label>
+      <p id="form-error" class="form-error" role="alert" hidden></p>
+
+      <fieldset class="field">
+        <legend class="field-label">Icon</legend>
+        <div id="emoji-grid" class="emoji-grid"></div>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend class="field-label">Colour</legend>
+        <div id="color-row" class="color-row"></div>
+      </fieldset>
+
+      <div class="field">
+        <label class="field-label" for="habit-schedule">Repeat</label>
+        <select id="habit-schedule">
+          <option value="daily">Every day</option>
+          <option value="weekdays">Weekdays</option>
+          <option value="weekends">Weekends</option>
+          <option value="custom">Custom days</option>
+        </select>
+      </div>
+
+      <div id="day-picker" class="day-picker" hidden>
+        <button type="button" data-day="1" aria-pressed="false">Mon</button>
+        <button type="button" data-day="2" aria-pressed="false">Tue</button>
+        <button type="button" data-day="3" aria-pressed="false">Wed</button>
+        <button type="button" data-day="4" aria-pressed="false">Thu</button>
+        <button type="button" data-day="5" aria-pressed="false">Fri</button>
+        <button type="button" data-day="6" aria-pressed="false">Sat</button>
+        <button type="button" data-day="0" aria-pressed="false">Sun</button>
+      </div>
+
+      <div class="sheet-actions">
+        <button type="button" id="delete-habit" class="danger-btn" hidden>Delete</button>
+        <span class="spacer"></span>
+        <button type="button" class="ghost-btn" data-close>Cancel</button>
+        <button type="submit" class="primary-btn" id="save-habit">Save habit</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <div id="confetti" class="confetti" aria-hidden="true"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
